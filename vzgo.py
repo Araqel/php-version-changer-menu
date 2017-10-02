@@ -4,6 +4,7 @@ import signal
 import json
 import string
 import subprocess
+import re
 
 gi.require_version('Gtk', '3.0')
 gi.require_version('AppIndicator3', '0.1')
@@ -17,20 +18,20 @@ APPINDICATOR_ID = 'myappindicator'
 
 
 def main():
-    indicator = appindicator.Indicator.new(APPINDICATOR_ID, os.path.abspath('sample_icon.svg'),
-                                           appindicator.IndicatorCategory.SYSTEM_SERVICES)
+    global indicator
+    indicator = appindicator.Indicator.new(APPINDICATOR_ID, os.path.abspath('php.png'),
+                                          appindicator.IndicatorCategory.SYSTEM_SERVICES)
+   
+    current_version= getPhpVersion()
+    indicator.set_label(current_version,APPINDICATOR_ID)
     indicator.set_status(appindicator.IndicatorStatus.ACTIVE)
     indicator.set_menu(build_menu())
     notify.init(APPINDICATOR_ID)
     gtk.main()
 
 
-def changePhpVersion(version):
-    pass
-
 
 def build_menu():
-
     versions=fetchVersions()
     menu = gtk.Menu()
     for version in versions:
@@ -59,13 +60,20 @@ def fetchVersions():
 
 
 def changePhpVersion(menuitem,version):
-    print(version)
-    #pipe = subprocess.Popen("chphp "+version, shell=True, stdout=subprocess.PIPE)
+    call(['gksudo','./change_php_version.sh '+version])	
+    indicator.set_label("PHP "+version,APPINDICATOR_ID)
 
 
 def quit(_):
     notify.uninit()
     gtk.main_quit()
+
+def getPhpVersion():
+    pipe = subprocess.Popen("php -v | grep -i '^php'", shell=True, stdout=subprocess.PIPE)
+    output = pipe.stdout
+    text=output.readline().decode('utf-8')
+
+    return re.search('(PHP [0-9].[0-9])',text).group(1)
 
 
 if __name__ == "__main__":
