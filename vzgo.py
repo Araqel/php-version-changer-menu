@@ -19,11 +19,12 @@ APPINDICATOR_ID = 'myappindicator'
 
 def main():
     global indicator
-    indicator = appindicator.Indicator.new(APPINDICATOR_ID, os.path.abspath('php.png'),
+    
+    current_version= getPhpVersion()
+    indicator = appindicator.Indicator.new(APPINDICATOR_ID, os.path.abspath('icons/php'+current_version+'.png'),
                                           appindicator.IndicatorCategory.SYSTEM_SERVICES)
    
-    current_version= getPhpVersion()
-    indicator.set_label(current_version,APPINDICATOR_ID)
+    indicator.set_label('PHP '+current_version,APPINDICATOR_ID)
     indicator.set_status(appindicator.IndicatorStatus.ACTIVE)
     indicator.set_menu(build_menu())
     notify.init(APPINDICATOR_ID)
@@ -35,7 +36,13 @@ def build_menu():
     versions=fetchVersions()
     menu = gtk.Menu()
     for version in versions:
-        menu_item=gtk.MenuItem(version)
+        menu_icon = gtk.Image()
+        menu_icon.set_from_file(os.path.abspath('icons/php'+version+'.png'))
+  
+        menu_item=gtk.ImageMenuItem(version)
+        menu_item.set_always_show_image(True)
+        menu_item.set_image(menu_icon)
+
         menu_item.connect('activate',changePhpVersion,version)
         menu.append(menu_item)
 
@@ -62,7 +69,7 @@ def fetchVersions():
 def changePhpVersion(menuitem,version):
     call(['gksudo','./change_php_version.sh '+version])	
     indicator.set_label("PHP "+version,APPINDICATOR_ID)
-
+    indicator.set_icon(os.path.abspath('icons/php'+version+'.png'))
 
 def quit(_):
     notify.uninit()
@@ -73,7 +80,7 @@ def getPhpVersion():
     output = pipe.stdout
     text=output.readline().decode('utf-8')
 
-    return re.search('(PHP [0-9].[0-9])',text).group(1)
+    return re.search('([0-9].[0-9])',text).group(1)
 
 
 if __name__ == "__main__":
