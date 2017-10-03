@@ -7,7 +7,7 @@ echo 'Please provide version'
 exit;
 fi
 if [ -z `ls /etc/php | grep $VERSION` ]; then
-echo "You don't have php$VERSION version MADAFAKA!!"
+echo "You don't have php$VERSION version!!"
 exit
 fi
 
