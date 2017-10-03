@@ -15,7 +15,7 @@ from gi.repository import AppIndicator3 as appindicator
 from gi.repository import Notify as notify
 from subprocess import call
 
-APPINDICATOR_ID = 'myappindicator'
+APPINDICATOR_ID = 'Araqels_PHP_Version_Changer_For_Ubuntu'
 
 
 def main():
@@ -49,17 +49,11 @@ def build_menu():
         menu_item.connect('activate',changePhpVersion,version)
         menu.append(menu_item)
 
-
-    item_quit = gtk.MenuItem('Quit')
-   # item_quit.connect('activate', quit)
-    menu.append(item_quit)
     menu.show_all()
     return menu
 
 
 def fetchVersions():
-    # aaa=call(['ls','/etc/php'])
-    # return aaa[0]
     pipe = subprocess.Popen("ls /etc/php", shell=True, stdout=subprocess.PIPE)
     output = pipe.stdout
     versions=[]
@@ -70,19 +64,12 @@ def fetchVersions():
 
 
 def changePhpVersion(menuitem,version):
-    result=call(['gksudo',dir_path+'/change_php_version.sh '+version])
+    call(['gksudo',dir_path+'/change_php_version.sh '+version])
     current_version=getPhpVersion()
     indicator.set_label("PHP " + current_version, APPINDICATOR_ID)
     indicator.set_icon(dir_path+'/icons/php'+current_version+'.png')
 
-    #if result!=255:
-    #    indicator.set_label("PHP "+version,APPINDICATOR_ID)
-    #    indicator.set_icon(os.path.abspath('icons/php'+version+'.png'))
 
-
-def quit(_):
-    notify.uninit()
-    gtk.main_quit()
 
 def getPhpVersion():
     pipe = subprocess.Popen("php -v | grep -i '^php'", shell=True, stdout=subprocess.PIPE)
